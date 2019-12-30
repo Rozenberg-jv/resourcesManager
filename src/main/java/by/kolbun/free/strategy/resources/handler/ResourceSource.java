@@ -1,17 +1,22 @@
 package by.kolbun.free.strategy.resources.handler;
 
-import by.kolbun.free.strategy.resources.Resource;
 import by.kolbun.free.strategy.resources.ResourceType;
+import by.kolbun.free.strategy.resources.events.ResourceEventType;
+import by.kolbun.free.strategy.resources.events.ResourceManager;
 import by.kolbun.free.strategy.resources.events.ResourceSetDeltaDto;
+import by.kolbun.free.strategy.resources.events.ResourceUpdateEvent;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ResourceSource extends Thread {
 
 	private final Map<ResourceType, Integer> resources = new HashMap<>();
+	private final ResourceManager resourceManager;
 
-	public ResourceSource() {
+	public ResourceSource(ResourceManager resourceManager) {
 
+		this.resourceManager = resourceManager;
 	}
 
 	public void addIncome(ResourceType resource, int value) {
@@ -28,6 +33,7 @@ public class ResourceSource extends Thread {
 
 				ResourceSetDeltaDto dto = new ResourceSetDeltaDto();
 				resources.forEach(dto::setResourcesDelta);
+				resourceManager.notify(ResourceEventType.UPDATE, new ResourceUpdateEvent(dto));
 
 			} catch (InterruptedException e) {
 				System.err.println(e.getMessage());
