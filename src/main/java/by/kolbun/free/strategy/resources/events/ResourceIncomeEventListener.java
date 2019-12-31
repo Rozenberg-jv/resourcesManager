@@ -2,7 +2,7 @@ package by.kolbun.free.strategy.resources.events;
 
 import java.util.EventObject;
 
-public interface ResourceEventListener {
+public interface ResourceIncomeEventListener {
 
 	void actionPerformed(EventObject e);
 

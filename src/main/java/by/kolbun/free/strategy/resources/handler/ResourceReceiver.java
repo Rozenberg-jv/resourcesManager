@@ -1,14 +1,17 @@
 package by.kolbun.free.strategy.resources.handler;
 
 import by.kolbun.free.strategy.resources.ResourceType;
+import by.kolbun.free.strategy.resources.events.ResourceUpdateEvent;
+import by.kolbun.free.strategy.resources.events.ResourceUpgradeEvent;
+import by.kolbun.free.strategy.resources.events.ResourceUpgradeEventListener;
 import by.kolbun.free.strategy.resources.storage.Resource;
-import by.kolbun.free.strategy.resources.events.ResourceEventListener;
+import by.kolbun.free.strategy.resources.events.ResourceIncomeEventListener;
 import by.kolbun.free.strategy.resources.dto.ResourceSetDeltaDto;
 import by.kolbun.free.strategy.resources.storage.SimpleResourceStorage;
 
 import java.util.*;
 
-public class ResourceReceiver implements ResourceEventListener {
+public class ResourceReceiver implements ResourceIncomeEventListener, ResourceUpgradeEventListener {
 
   private final Map<ResourceType, SimpleResourceStorage> storages = new HashMap<>();
 
@@ -21,6 +24,21 @@ public class ResourceReceiver implements ResourceEventListener {
     storages.putIfAbsent(type, new SimpleResourceStorage(type, maxCapacity));
   }
 
+  /*public void upgradeCapacity(ResourceType type, int capacityDelta) {
+    storages.compute(type, (t, storage) -> {
+      SimpleResourceStorage st;
+
+      if (storage == null) {
+        st = new SimpleResourceStorage(t, 0);
+      } else
+        st = storage;
+
+      st.updateMaxCapacity(capacityDelta);
+      return st;
+    });
+  }*/
+
+
   public void printStorageInfo() {
     storages.forEach(
         (type, storage) -> System.out.printf(
@@ -32,20 +50,29 @@ public class ResourceReceiver implements ResourceEventListener {
   }
 
   @Override
-  public void actionPerformed(EventObject e) {
+  public void actionPerformed(EventObject event) {
 
-    ResourceSetDeltaDto income = ((ResourceSetDeltaDto) e.getSource());
+    if (event instanceof ResourceUpdateEvent) {
 
-    income.getResources().forEach(
-        (type, delta) -> {
-          Resource res = storages.get(type);
-//          System.out.println(type + " " + (delta > 0 ? "+" : "") + delta);
-//          printStorageInfo();
-          if (res != null)
-            res.updateCurValue(delta);
-        });
+      ResourceSetDeltaDto income = ((ResourceSetDeltaDto) event.getSource());
 
+      income.getResources().forEach(
+          (type, delta) -> {
+            Resource storage = storages.get(type);
+            if (storage != null)
+              storage.updateCurValue(delta);
+          });
+    } else if (event instanceof ResourceUpgradeEvent) {
 
-//    storage.forEach((key, value) -> System.out.println(key + ":" + value.getCurValue()));
+      ResourceSetDeltaDto capacityDelta = ((ResourceSetDeltaDto) event.getSource());
+
+      capacityDelta.getResources().forEach(
+          (type, delta) -> {
+            Resource storage = storages.get(type);
+            if (storage != null)
+              storage.updateMaxCapacity(delta);
+          });
+    }
+
   }
 }
