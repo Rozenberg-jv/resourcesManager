@@ -1,4 +1,7 @@
-package by.kolbun.free.strategy.resources.events;
+package by.kolbun.free.strategy.resources.handler;
+
+import by.kolbun.free.strategy.resources.events.ResourceEventListener;
+import by.kolbun.free.strategy.resources.events.ResourceEventType;
 
 import java.util.*;
 import java.util.stream.Stream;

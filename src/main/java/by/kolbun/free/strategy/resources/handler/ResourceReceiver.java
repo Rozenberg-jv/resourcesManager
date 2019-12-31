@@ -1,28 +1,46 @@
 package by.kolbun.free.strategy.resources.handler;
 
 import by.kolbun.free.strategy.resources.ResourceType;
+import by.kolbun.free.strategy.resources.storage.Resource;
 import by.kolbun.free.strategy.resources.events.ResourceEventListener;
-import by.kolbun.free.strategy.resources.events.ResourceSetDeltaDto;
+import by.kolbun.free.strategy.resources.dto.ResourceSetDeltaDto;
+import by.kolbun.free.strategy.resources.storage.SimpleResourceStorage;
 
-import java.util.EventObject;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class ResourceReceiver implements ResourceEventListener {
 
-	private final Map<ResourceType, Integer> storage = new HashMap<>();
+  private final Map<ResourceType, SimpleResourceStorage> storages = new HashMap<>();
 
-	public ResourceReceiver() {
+  public ResourceReceiver() {
 
-	}
+  }
 
-	@Override
-	public void actionPerformed(EventObject e) {
+  public void printStorageInfo() {
+    storages.forEach(
+        storage -> System.out.printf(
+            "%s: %d / %d",
+            storage.getResourceType(),
+            storage.getCurValue(),
+            storage.getMaxCapacity()));
+    System.out.println();
+  }
 
-		ResourceSetDeltaDto inc = ((ResourceSetDeltaDto) e.getSource());
+  @Override
+  public void actionPerformed(EventObject e) {
 
-		inc.getResources().forEach((k, v) -> storage.merge(k, v, (r, i) -> i += i));
+    ResourceSetDeltaDto income = ((ResourceSetDeltaDto) e.getSource());
 
-		storage.forEach((key, value) -> System.out.println(key + ":" + value));
-	}
+    income.getResources().forEach(
+        (resource, value) -> {
+          Resource res = storages.get(resource);
+          if (res == null)
+            storages.put(res, 0);
+
+
+          res.updateCurValue(value);
+        });
+
+//    storage.forEach((key, value) -> System.out.println(key + ":" + value.getCurValue()));
+  }
 }

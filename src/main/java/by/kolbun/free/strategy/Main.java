@@ -2,27 +2,35 @@ package by.kolbun.free.strategy;
 
 import by.kolbun.free.strategy.resources.ResourceType;
 import by.kolbun.free.strategy.resources.events.ResourceEventType;
-import by.kolbun.free.strategy.resources.events.ResourceManager;
+import by.kolbun.free.strategy.resources.handler.ResourceManager;
 import by.kolbun.free.strategy.resources.handler.ResourceReceiver;
 import by.kolbun.free.strategy.resources.handler.ResourceSource;
 
 public class Main {
 
-	public static void main(String[] args) throws Exception {
+  public static void main(String[] args) throws Exception {
 
-		ResourceManager manager = new ResourceManager();
-		ResourceReceiver receiver = new ResourceReceiver();
-		manager.subscribe(ResourceEventType.UPDATE, receiver);
+    ResourceManager manager = new ResourceManager();
+    ResourceReceiver receiver = new ResourceReceiver();
+    manager.subscribe(ResourceEventType.UPDATE, receiver);
 
-		ResourceSource source = new ResourceSource(manager);
+    StorageInfoLogger logger = new StorageInfoLogger(receiver);
+    logger.start();
 
-		source.addIncome(ResourceType.GOLD, 5);
-		source.start();
+    ResourceSource sourceGold = new ResourceSource(manager);
 
-		Thread.sleep(4000);
-		source.addIncome(ResourceType.WOOD, 5);
-		source.addIncome(ResourceType.GOLD, 4);
+    sourceGold.changeIncome(ResourceType.GOLD, 5);
+    sourceGold.start();
 
-	}
+    Thread.sleep(3000);
+
+    ResourceSource sourceWood = new ResourceSource(manager);
+    sourceWood.changeIncome(ResourceType.WOOD, 5);
+    sourceWood.changeIncome(ResourceType.GOLD, 5);
+    sourceWood.start();
+
+    Thread.sleep(5000);
+
+  }
 
 }

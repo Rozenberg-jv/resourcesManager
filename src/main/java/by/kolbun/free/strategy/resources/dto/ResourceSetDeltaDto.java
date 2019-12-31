@@ -1,4 +1,4 @@
-package by.kolbun.free.strategy.resources.events;
+package by.kolbun.free.strategy.resources.dto;
 
 import by.kolbun.free.strategy.resources.ResourceType;
 import lombok.Getter;
