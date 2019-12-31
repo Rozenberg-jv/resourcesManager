@@ -1,28 +1,37 @@
 package by.kolbun.free.strategy.resources.handler;
 
 import by.kolbun.free.strategy.resources.ResourceType;
-import by.kolbun.free.strategy.resources.dto.ResourceSetDeltaDto;
+import by.kolbun.free.strategy.resources.dto.ResourcesDto;
 import by.kolbun.free.strategy.resources.events.ResourceEventType;
 import by.kolbun.free.strategy.resources.events.ResourceUpdateEvent;
+import by.kolbun.free.strategy.resources.exceptions.ResourceUnsupportedByStorageException;
+import by.kolbun.free.strategy.resources.storage.MultipleResourcesStorage;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Arrays;
+import java.util.Collections;
 
 public class ResourceSource extends Thread {
 
-	private final Map<ResourceType, Integer> resourceIncome;
+	// источник!
+	private final MultipleResourcesStorage resourceIncome;
 	private final ResourceManager resourceManager;
 
-	public ResourceSource(ResourceManager resourceManager) {
+	public ResourceSource(ResourceManager resourceManager, ResourceType... types) {
 
-		this.resourceIncome = new HashMap<>();
+		this.resourceIncome = new MultipleResourcesStorage();
+		Arrays.asList(types).forEach(type -> resourceIncome.allowStorage(type, 0));
+
 		this.resourceManager = resourceManager;
 		this.setDaemon(true);
 	}
 
 	public void changeIncome(ResourceType type, int incomeDelta) {
 
-		resourceIncome.merge(type, incomeDelta, Integer::sum);
+		try {
+			resourceIncome.changeIncome(type, incomeDelta);
+		} catch (ResourceUnsupportedByStorageException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -32,8 +41,7 @@ public class ResourceSource extends Thread {
 			try {
 				Thread.sleep(1000);
 
-				ResourceSetDeltaDto dto = new ResourceSetDeltaDto();
-				resourceIncome.forEach(dto::setResourcesDelta);
+				ResourcesDto dto = resourceIncome.getResourcesDto();
 				resourceManager.notify(ResourceEventType.UPDATE, new ResourceUpdateEvent(dto));
 
 			} catch (InterruptedException e) {

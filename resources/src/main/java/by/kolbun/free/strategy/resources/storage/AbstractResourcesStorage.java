@@ -4,7 +4,7 @@ import by.kolbun.free.strategy.resources.ResourceType;
 import lombok.Getter;
 
 @Getter
-public abstract class AbstractResourceStorage implements Resource {
+public abstract class AbstractResourcesStorage implements Resources {
 
   private final ResourceType resourceType;
 
@@ -12,12 +12,12 @@ public abstract class AbstractResourceStorage implements Resource {
 
   private volatile int curValue;
 
-  public AbstractResourceStorage(ResourceType resourceType, int maxCapacity) {
+  public AbstractResourcesStorage(ResourceType resourceType, int maxCapacity) {
 
     this(resourceType, maxCapacity, 0);
   }
 
-  public AbstractResourceStorage(ResourceType resourceType, int maxCapacity, int curValue) {
+  public AbstractResourcesStorage(ResourceType resourceType, int maxCapacity, int curValue) {
 
     this.resourceType = resourceType;
     this.maxCapacity = maxCapacity;

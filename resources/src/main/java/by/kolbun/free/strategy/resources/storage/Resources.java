@@ -2,7 +2,7 @@ package by.kolbun.free.strategy.resources.storage;
 
 import by.kolbun.free.strategy.resources.ResourceType;
 
-public interface Resource {
+public interface Resources {
 
 	void updateMaxCapacity(int delta);
 
