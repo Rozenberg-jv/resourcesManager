@@ -36,11 +36,8 @@ public abstract class AbstractResourceStorage implements Resource {
 
     int newValue = this.curValue + delta;
 
-    if (newValue < 0)
-      curValue = 0;
-    else if (newValue > maxCapacity)
-      newValue = maxCapacity;
-    else
-      this.curValue += delta;
+    if (newValue <= 0)
+      this.curValue = 0;
+    else curValue = Math.min(newValue, maxCapacity);
   }
 }

@@ -11,10 +11,12 @@ public class Main {
   public static void main(String[] args) throws Exception {
 
     ResourceManager manager = new ResourceManager();
-    ResourceReceiver receiver = new ResourceReceiver();
-    manager.subscribe(ResourceEventType.UPDATE, receiver);
+    ResourceReceiver storage = new ResourceReceiver();
+    storage.addStorage(ResourceType.GOLD, 40);
+    storage.addStorage(ResourceType.WOOD, 40);
+    manager.subscribe(ResourceEventType.UPDATE, storage);
 
-    StorageInfoLogger logger = new StorageInfoLogger(receiver);
+    StorageInfoLogger logger = new StorageInfoLogger(storage);
     logger.start();
 
     ResourceSource sourceGold = new ResourceSource(manager);
@@ -24,12 +26,13 @@ public class Main {
 
     Thread.sleep(3000);
 
-    ResourceSource sourceWood = new ResourceSource(manager);
-    sourceWood.changeIncome(ResourceType.WOOD, 5);
-    sourceWood.changeIncome(ResourceType.GOLD, 5);
-    sourceWood.start();
+    sourceGold.changeIncome(ResourceType.GOLD, -10);
+//    ResourceSource sourceWood = new ResourceSource(manager);
+//    sourceWood.changeIncome(ResourceType.WOOD, 10);
+//    sourceWood.changeIncome(ResourceType.GOLD, -20);
+//    sourceWood.start();
 
-    Thread.sleep(5000);
+    Thread.sleep(7000);
 
   }
 

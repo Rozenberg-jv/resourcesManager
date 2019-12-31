@@ -16,10 +16,15 @@ public class ResourceReceiver implements ResourceEventListener {
 
   }
 
+  public void addStorage(ResourceType type, int maxCapacity) {
+
+    storages.putIfAbsent(type, new SimpleResourceStorage(type, maxCapacity));
+  }
+
   public void printStorageInfo() {
     storages.forEach(
-        storage -> System.out.printf(
-            "%s: %d / %d",
+        (type, storage) -> System.out.printf(
+            "%s: %d / %d\n",
             storage.getResourceType(),
             storage.getCurValue(),
             storage.getMaxCapacity()));
@@ -32,14 +37,14 @@ public class ResourceReceiver implements ResourceEventListener {
     ResourceSetDeltaDto income = ((ResourceSetDeltaDto) e.getSource());
 
     income.getResources().forEach(
-        (resource, value) -> {
-          Resource res = storages.get(resource);
-          if (res == null)
-            storages.put(res, 0);
-
-
-          res.updateCurValue(value);
+        (type, delta) -> {
+          Resource res = storages.get(type);
+//          System.out.println(type + " " + (delta > 0 ? "+" : "") + delta);
+//          printStorageInfo();
+          if (res != null)
+            res.updateCurValue(delta);
         });
+
 
 //    storage.forEach((key, value) -> System.out.println(key + ":" + value.getCurValue()));
   }

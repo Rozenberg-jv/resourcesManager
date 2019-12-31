@@ -10,35 +10,35 @@ import java.util.Map;
 
 public class ResourceSource extends Thread {
 
-    private final Map<ResourceType, Integer> resourceIncome = new HashMap<>();
-    private final ResourceManager resourceManager;
+  private final Map<ResourceType, Integer> resourceIncome = new HashMap<>();
+  private final ResourceManager resourceManager;
 
-    public ResourceSource(ResourceManager resourceManager) {
+  public ResourceSource(ResourceManager resourceManager) {
 
-        this.resourceManager = resourceManager;
-        this.setDaemon(true);
+    this.resourceManager = resourceManager;
+    this.setDaemon(true);
+  }
+
+  public void changeIncome(ResourceType type, int incomeDelta) {
+
+    resourceIncome.merge(type, incomeDelta, Integer::sum);
+  }
+
+  @Override
+  public void run() {
+
+    while (true) {
+      try {
+        Thread.sleep(1000);
+
+        ResourceSetDeltaDto dto = new ResourceSetDeltaDto();
+        resourceIncome.forEach(dto::setResourcesDelta);
+        resourceManager.notify(ResourceEventType.UPDATE, new ResourceUpdateEvent(dto));
+
+      } catch (InterruptedException e) {
+        System.err.println(e.getMessage());
+      }
     }
-
-    public void changeIncome(ResourceType resource, int value) {
-
-        resourceIncome.merge(resource, value, (vOld, vNew) -> vOld += vNew);
-    }
-
-    @Override
-    public void run() {
-
-        while (true) {
-            try {
-                Thread.sleep(1000);
-
-                ResourceSetDeltaDto dto = new ResourceSetDeltaDto();
-                resourceIncome.forEach(dto::setResourcesDelta);
-                resourceManager.notify(ResourceEventType.UPDATE, new ResourceUpdateEvent(dto));
-
-            } catch (InterruptedException e) {
-                System.err.println(e.getMessage());
-            }
-        }
-    }
+  }
 
 }
